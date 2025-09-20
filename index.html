@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Startup Analyst</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .container {
+            max-width: 500px;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #007bff;
+            animation: spin 1s ease infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen bg-gray-100 p-4">
+    <div class="container bg-white p-8 rounded-xl shadow-lg border border-gray-200">
+        <div class="text-center">
+            <h1 class="text-3xl font-bold text-gray-800">AI Startup Analyst</h1>
+            <p class="mt-2 text-gray-600">Analyze your pitch deck with AI to generate a detailed investment memo.</p>
+        </div>
+
+        <form id="uploadForm" class="mt-6 space-y-4">
+            <div>
+                <label for="pdfFile" class="block text-sm font-medium text-gray-700">Upload Pitch Deck (PDF)</label>
+                <div class="mt-2 flex items-center justify-center w-full bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 px-6 py-8">
+                    <label for="pdfFile" class="flex flex-col items-center justify-center w-full h-full cursor-pointer">
+                        <svg class="w-10 h-10 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 3-6 4 8z"></path>
+                        </svg>
+                        <p id="fileName" class="text-sm text-gray-600 mt-2">No file selected</p>
+                        <input id="pdfFile" type="file" accept=".pdf" class="hidden">
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" id="analyzeButton" class="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-indigo-700 transition-colors duration-200">
+                Analyze Pitch Deck
+            </button>
+        </form>
+
+        <div id="statusMessage" class="mt-6 hidden text-center">
+            <div id="loadingSpinner" class="spinner mx-auto hidden"></div>
+            <p id="messageText" class="mt-2 text-gray-700"></p>
+        </div>
+
+        <div id="resultContainer" class="mt-6 hidden p-4 bg-gray-50 rounded-lg border border-gray-200 overflow-y-auto max-h-[400px]">
+            <h3 class="text-lg font-semibold text-gray-800">Investment Memo</h3>
+            <div id="investmentMemo" class="mt-2 prose max-w-none text-gray-800"></div>
+        </div>
+    </div>
+
+    <div id="messageBox" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+            <h3 id="messageBoxTitle" class="text-xl font-bold text-gray-800 mb-2"></h3>
+            <p id="messageBoxContent" class="text-gray-700"></p>
+            <div class="mt-4 flex justify-end">
+                <button onclick="document.getElementById('messageBox').classList.add('hidden')" class="bg-indigo-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-indigo-700 transition-colors duration-200">
+                    OK
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const uploadForm = document.getElementById('uploadForm');
+        const pdfFile = document.getElementById('pdfFile');
+        const analyzeButton = document.getElementById('analyzeButton');
+        const fileNameSpan = document.getElementById('fileName');
+        const statusMessage = document.getElementById('statusMessage');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const messageText = document.getElementById('messageText');
+        const resultContainer = document.getElementById('resultContainer');
+        const investmentMemo = document.getElementById('investmentMemo');
+        const messageBox = document.getElementById('messageBox');
+        const messageBoxTitle = document.getElementById('messageBoxTitle');
+        const messageBoxContent = document.getElementById('messageBoxContent');
+
+        function showMessageBox(title, content) {
+            messageBoxTitle.textContent = title;
+            messageBoxContent.textContent = content;
+            messageBox.classList.remove('hidden');
+        }
+
+        pdfFile.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                fileNameSpan.textContent = file.name;
+            } else {
+                fileNameSpan.textContent = 'No file selected';
+            }
+        });
+
+        uploadForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const file = pdfFile.files[0];
+            if (!file) {
+                showMessageBox('No File Selected', 'Please select a PDF file to analyze.');
+                return;
+            }
+
+            // Hide previous results and show loading indicator
+            resultContainer.classList.add('hidden');
+            statusMessage.classList.remove('hidden');
+            loadingSpinner.classList.remove('hidden');
+            messageText.textContent = 'Uploading and analyzing your pitch deck. This may take a moment...';
+            analyzeButton.disabled = true;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                // Adjust the API URL to your deployed Render service
+                const response = await fetch('https://ai-pitchdeck-analyzer.onrender.com/ask', {
+                    method: 'POST',
+                    body: formData,
+                    // CORS headers are NOT needed here. They are handled by the browser
+                    // when both frontend and backend are on the same domain or
+                    // when the server explicitly allows the origin.
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Analysis failed. Please try again.');
+                }
+
+                const data = await response.json();
+
+                if (data.markdown) {
+                    investmentMemo.innerHTML = data.markdown;
+                    resultContainer.classList.remove('hidden');
+                    statusMessage.classList.add('hidden');
+                } else {
+                    throw new Error('Analysis completed, but no memo was returned.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                loadingSpinner.classList.add('hidden');
+                messageText.textContent = '';
+                showMessageBox('Error', error.message || 'An unexpected error occurred.');
+            } finally {
+                loadingSpinner.classList.add('hidden');
+                analyzeButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
