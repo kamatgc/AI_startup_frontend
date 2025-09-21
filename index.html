@@ -3,251 +3,327 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Startup Analyst</title>
+    <title>AI Analyst for Startup Evaluation</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #1a1a2e;
-            color: #ffffff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
+            background-color: #f3f4f6;
         }
         .container {
-            background-color: #162447;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            width: 100%;
-            max-width: 600px;
-            text-align: center;
+            max-width: 900px;
+            margin: auto;
+            padding: 2rem;
         }
-        .file-upload-container {
-            border: 2px dashed #3a476a;
-            border-radius: 10px;
-            padding: 30px;
-            margin-top: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .file-upload-container:hover {
-            background-color: #213054;
-            border-color: #556c8f;
-        }
-        .input-btn {
-            background-color: #4b6cb7;
-            color: #ffffff;
-            font-weight: 600;
-            padding: 12px 24px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .input-btn:hover {
-            background-color: #3b5a9a;
-            transform: translateY(-2px);
+        .card {
+            background-color: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
         .btn-primary {
-            background-image: linear-gradient(to right, #4b6cb7 0%, #182848 100%);
-            border: none;
+            background-color: #4f46e5;
             color: white;
-            padding: 15px 30px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin-top: 20px;
-            cursor: pointer;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
         }
         .btn-primary:hover {
-            background-image: linear-gradient(to right, #182848 0%, #4b6cb7 100%);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-            transform: translateY(-2px);
+            background-color: #4338ca;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        #analysisResult {
-            text-align: left;
-            margin-top: 30px;
-            padding: 20px;
-            background-color: #1e2a4a;
-            border-radius: 10px;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            line-height: 1.6;
-            max-height: 500px;
-            overflow-y: auto;
-        }
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-left-color: #4b6cb7;
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4f46e5;
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            width: 24px;
+            height: 24px;
             animation: spin 1s linear infinite;
-            display: none;
-            margin: 20px auto;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        /* Custom alert box styling */
-        .custom-alert {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #162447;
-            padding: 25px 35px;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.7);
-            z-index: 1000;
-            display: none;
-            flex-direction: column;
+        .markdown-body h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+        .markdown-body h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .markdown-body h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .markdown-body p, .markdown-body ul, .markdown-body li {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        .markdown-body strong {
+            font-weight: 700;
+        }
+        .markdown-body ul {
+            list-style-type: disc;
+            padding-left: 2rem;
+        }
+        /* Mobile adjustments */
+        @media (max-width: 640px) {
+            .container {
+                padding: 1rem;
+            }
+            .card {
+                padding: 1rem;
+                border-radius: 1rem;
+            }
+            .markdown-body h1 {
+                font-size: 2rem;
+            }
+            .markdown-body h2 {
+                font-size: 1.5rem;
+            }
+            .markdown-body h3 {
+                font-size: 1.25rem;
+            }
+        }
+        .status-section {
+            display: flex;
             align-items: center;
+            justify-content: center;
+            flex-direction: column;
             text-align: center;
         }
-        .custom-alert-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
-            z-index: 999;
-            display: none;
+        .memo-output {
+            padding: 1.5rem;
+            background-color: #f9fafb;
+            border-radius: 1rem;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            line-height: 1.6;
+            text-align: left;
         }
-        .custom-alert-message {
-            font-size: 1.1rem;
-            margin-bottom: 20px;
+        .memo-output table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .memo-output th, .memo-output td {
+            border: 1px solid #e5e7eb;
+            padding: 0.5rem;
+        }
+        .memo-output th {
+            background-color: #eef2ff;
+        }
+        .memo-output h1, .memo-output h2, .memo-output h3 {
+            font-weight: bold;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .memo-output h1 { font-size: 2em; }
+        .memo-output h2 { font-size: 1.5em; }
+        .memo-output h3 { font-size: 1.25em; }
+        .memo-output ul, .memo-output ol {
+            list-style-position: inside;
+            margin-left: 1.5rem;
+            padding: 0;
         }
     </style>
 </head>
-<body class="bg-gray-900 text-white">
+<body class="bg-gray-100">
+    <div class="container py-12">
+        <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">AI Analyst for Startup Evaluation</h1>
 
-    <div class="custom-alert-overlay" id="alert-overlay"></div>
-    <div class="custom-alert" id="custom-alert">
-        <h3 class="text-xl font-bold mb-4">Error</h3>
-        <p class="custom-alert-message" id="alert-message"></p>
-        <button id="alert-ok-btn" class="input-btn">OK</button>
-    </div>
+        <div id="upload-section" class="card p-8 text-center mb-8">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Upload Pitch Deck PDF</h2>
+            <form id="uploadForm">
+                <div class="mb-6 flex items-center justify-center space-x-4">
+                    <label for="pdfFile" class="file-upload-label">
+                        Choose File
+                    </label>
+                    <input type="file" id="pdfFile" accept=".pdf" class="hidden">
+                    <span id="fileName" class="text-gray-500">No file chosen</span>
+                </div>
+                <button type="submit" id="submitBtn" class="btn-primary w-full" disabled>
+                    <span id="btnText">Analyze Pitch Deck</span>
+                </button>
+            </form>
+        </div>
 
-    <div class="container">
-        <h1 class="text-4xl font-bold mb-2">AI Startup Analyst</h1>
-        <p class="text-lg text-gray-400">Analyze your pitch deck with AI to generate a detailed investment memo.</p>
+        <div id="loading-section" class="status-section hidden card p-8 mb-8">
+            <div class="loader"></div>
+            <p id="statusMessage" class="mt-4 text-gray-600 font-medium"></p>
+            <p id="etaMessage" class="text-sm text-gray-500 mt-2"></p>
+        </div>
 
-        <form id="uploadForm" class="mt-8">
-            <div class="file-upload-container">
-                <input type="file" id="pdfFile" accept=".pdf" class="hidden">
-                <label for="pdfFile" class="input-btn">Choose file</label>
-                <span id="fileName" class="ml-4 text-gray-400">No file chosen</span>
-            </div>
-            <button type="submit" id="submitBtn" class="btn-primary" disabled>
-                Analyze Pitch Deck
-            </button>
-        </form>
+        <div id="memo-section" class="card hidden">
+            <h2 class="text-2xl font-semibold text-gray-800 p-8 pb-0">Investment Memo</h2>
+            <div id="memo-output" class="memo-output markdown-body"></div>
+        </div>
 
-        <div id="loadingSpinner" class="spinner"></div>
-        <p id="statusMessage" class="mt-4 text-gray-400"></p>
-
-        <div id="analysisResult" class="hidden">
-            <h2 class="text-2xl font-bold mb-4">Investment Memo</h2>
-            <div id="resultContent" class="prose max-w-none"></div>
+        <div id="error-section" class="card hidden p-8 text-center">
+            <h2 class="text-2xl font-semibold mb-4 text-red-600">Analysis Failed</h2>
+            <p class="text-gray-600"></p>
         </div>
     </div>
 
     <script>
-        const form = document.getElementById('uploadForm');
-        const fileInput = document.getElementById('pdfFile');
-        const fileNameSpan = document.getElementById('fileName');
-        const submitBtn = document.getElementById('submitBtn');
-        const loadingSpinner = document.getElementById('loadingSpinner');
-        const analysisResultDiv = document.getElementById('analysisResult');
-        const resultContentDiv = document.getElementById('resultContent');
-        const statusMessage = document.getElementById('statusMessage');
+        document.addEventListener('DOMContentLoaded', () => {
+            const fileInput = document.getElementById('pdfFile');
+            const fileNameSpan = document.getElementById('fileName');
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const uploadForm = document.getElementById('uploadForm');
+            const loadingSection = document.getElementById('loading-section');
+            const memoSection = document.getElementById('memo-section');
+            const memoOutput = document.getElementById('memo-output');
+            const errorSection = document.getElementById('error-section');
+            const statusMessage = document.getElementById('statusMessage');
+            const etaMessage = document.getElementById('etaMessage');
 
-        // Custom alert elements
-        const customAlert = document.getElementById('custom-alert');
-        const alertOverlay = document.getElementById('alert-overlay');
-        const alertMessage = document.getElementById('alert-message');
-        const alertOkBtn = document.getElementById('alert-ok-btn');
+            let startTime = 0;
 
-        const API_URL = "https://ai-pitchdeck-analyzer.onrender.com/ask";
+            // Update file name and button state
+            fileInput.addEventListener('change', () => {
+                const file = fileInput.files[0];
+                if (file) {
+                    fileNameSpan.textContent = file.name;
+                    submitBtn.disabled = false;
+                } else {
+                    fileNameSpan.textContent = 'No file chosen';
+                    submitBtn.disabled = true;
+                }
+            });
 
-        function showAlert(message) {
-            alertMessage.textContent = message;
-            customAlert.style.display = 'flex';
-            alertOverlay.style.display = 'block';
-        }
+            uploadForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const file = fileInput.files[0];
 
-        alertOkBtn.addEventListener('click', () => {
-            customAlert.style.display = 'none';
-            alertOverlay.style.display = 'none';
-        });
+                if (!file) {
+                    displayError('Please select a PDF file to upload.');
+                    return;
+                }
 
-        fileInput.addEventListener('change', () => {
-            if (fileInput.files.length > 0) {
-                fileNameSpan.textContent = fileInput.files[0].name;
-                submitBtn.disabled = false;
-            } else {
-                fileNameSpan.textContent = 'No file chosen';
-                submitBtn.disabled = true;
-            }
-        });
-
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const file = fileInput.files[0];
-            if (!file) {
-                showAlert('Please select a PDF file to upload.');
-                return;
-            }
-
-            loadingSpinner.style.display = 'block';
-            submitBtn.disabled = true;
-            analysisResultDiv.classList.add('hidden');
-            statusMessage.textContent = 'Analyzing...';
-            const startTime = performance.now();
-
-            try {
-                // Use FormData to send the file correctly
                 const formData = new FormData();
                 formData.append('pdf_file', file);
 
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    body: formData, // Send the FormData object
-                });
+                showLoading('Preparing analysis...');
+                startTime = Date.now();
+                let lastChunkTime = startTime;
+                let processedChunks = 0;
+                let totalChunks = 0;
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                try {
+                    const response = await fetch('/ask', {
+                        method: 'POST',
+                        body: formData,
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Server error.');
+                    }
+
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder('utf-8');
+                    let buffer = '';
+
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+
+                        buffer += decoder.decode(value, { stream: true });
+                        const lines = buffer.split('\n');
+                        buffer = lines.pop();
+
+                        for (const line of lines) {
+                            if (line.trim() === '') continue;
+                            try {
+                                const data = JSON.parse(line);
+                                if (data.status) {
+                                    statusMessage.textContent = data.status;
+
+                                    if (data.status.startsWith('Analyzing chunk')) {
+                                        const now = Date.now();
+                                        processedChunks++;
+                                        const match = data.status.match(/(\d+) of (\d+)/);
+                                        if (match) {
+                                            const currentChunk = parseInt(match[1]);
+                                            totalChunks = parseInt(match[2]);
+                                            if (processedChunks > 1) {
+                                                const avgTimePerChunk = (now - startTime) / processedChunks;
+                                                const remainingChunks = totalChunks - processedChunks;
+                                                const estimatedSeconds = Math.round((remainingChunks * avgTimePerChunk) / 1000);
+                                                etaMessage.classList.remove('hidden');
+                                                etaMessage.textContent = `Estimated time remaining: ~${estimatedSeconds} seconds`;
+                                            }
+                                        }
+                                        lastChunkTime = now;
+                                    } else {
+                                        etaMessage.classList.add('hidden');
+                                    }
+                                }
+                                if (data.memo) {
+                                    displayMemo(data.memo);
+                                }
+                                if (data.error) {
+                                    displayError(data.error);
+                                }
+                            } catch (e) {
+                                console.error('Error parsing JSON:', e, 'Line:', line);
+                            }
+                        }
+                    }
+
+                    if (buffer.trim() !== '') {
+                        try {
+                            const data = JSON.parse(buffer);
+                            if (data.memo) displayMemo(data.memo);
+                            if (data.error) displayError(data.error);
+                        } catch (e) {
+                            console.error('Error parsing final buffer:', e);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Fetch error:', error);
+                    displayError('Network error: Could not connect to the server.');
                 }
+            });
 
-                const data = await response.json();
-                resultContentDiv.innerHTML = data.response;
-                analysisResultDiv.classList.remove('hidden');
+            function showLoading(message) {
+                loadingSection.classList.remove('hidden');
+                document.getElementById('upload-section').classList.add('hidden');
+                memoSection.classList.add('hidden');
+                errorSection.classList.add('hidden');
+                btnText.textContent = 'Analyzing...';
+                statusMessage.textContent = message;
+                etaMessage.classList.add('hidden');
+            }
 
-            } catch (error) {
-                console.error('Fetch error:', error);
-                showAlert(`Analysis failed: ${error.message}. Please try again.`);
+            function displayMemo(memoText) {
+                loadingSection.classList.add('hidden');
+                document.getElementById('upload-section').classList.remove('hidden');
+                memoSection.classList.remove('hidden');
+                memoOutput.innerHTML = marked.parse(memoText);
+                btnText.textContent = 'Analyze Pitch Deck';
+            }
 
-            } finally {
-                loadingSpinner.style.display = 'none';
-                submitBtn.disabled = false;
-                const endTime = performance.now();
-                const elapsedTime = ((endTime - startTime) / 1000).toFixed(2);
-                statusMessage.textContent = `Analysis complete! (${elapsedTime} seconds)`;
+            function displayError(message) {
+                loadingSection.classList.add('hidden');
+                document.getElementById('upload-section').classList.remove('hidden');
+                errorSection.classList.remove('hidden');
+                errorSection.querySelector('p').textContent = message;
+                btnText.textContent = 'Analyze Pitch Deck';
             }
         });
-
     </script>
 </body>
 </html>
