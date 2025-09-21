@@ -208,14 +208,14 @@
                 const file = fileInput.files[0];
 
                 if (!file) {
-                    displayError('Please select a PDF file to upload.');
+                    displayError('Please select a PDF file to upload. ');
                     return;
                 }
 
                 const formData = new FormData();
                 formData.append('pdf_file', file);
 
-                showLoading('Preparing analysis...');
+                showLoading('Preparing analysis....');
                 startTime = Date.now();
                 let lastChunkTime = startTime;
                 let processedChunks = 0;
